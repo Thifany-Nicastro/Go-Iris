@@ -7,7 +7,9 @@ import (
 	"log"
 
 	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/mvc"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type TodoController struct {
@@ -30,25 +32,55 @@ func (c *TodoController) Get() []models.Todo {
 	return todos
 }
 
-func (c *TodoController) Post(t models.Todo) int {
+func (c *TodoController) Post(t models.Todo) mvc.Result {
 	todosCollection := config.GetCollection("todos")
-	_, err := todosCollection.InsertOne(context.TODO(), t)
+	result, err := todosCollection.InsertOne(context.TODO(), t)
 	if err != nil {
 		log.Fatal(err)
 	}
-	// println("Received Todo: " + t.Title)
 
-	return iris.StatusCreated
+	return mvc.Response{
+		Code:   iris.StatusCreated,
+		Object: result,
+	}
 }
 
-func (c *TodoController) Delete(t models.Todo) int {
-	println("Received Todo: " + t.Title)
+func (c *TodoController) DeleteBy(id string) mvc.Result {
+	todosCollection := config.GetCollection("todos")
 
-	return iris.StatusCreated
+	objId, _ := primitive.ObjectIDFromHex(id)
+
+	result, err := todosCollection.DeleteOne(context.TODO(), bson.M{"_id": objId})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return mvc.Response{
+		Code:   iris.StatusOK,
+		Object: result,
+	}
 }
 
-func (c *TodoController) GetBy(id string) int {
-	println("Received Todo: " + id)
+func (c *TodoController) GetBy(id string) mvc.Result {
+	var todo models.Todo
 
-	return iris.StatusCreated
+	todosCollection := config.GetCollection("todos")
+
+	objId, _ := primitive.ObjectIDFromHex(id)
+
+	err := todosCollection.FindOne(context.TODO(), bson.M{"_id": objId}).Decode(&todo)
+	if err != nil {
+		return mvc.Response{
+			Code: iris.StatusNotFound,
+			Object: map[string]any{
+				"Message": "test",
+				"hmm":     1,
+			},
+		}
+	}
+
+	return mvc.Response{
+		Code:   iris.StatusOK,
+		Object: todo,
+	}
 }
