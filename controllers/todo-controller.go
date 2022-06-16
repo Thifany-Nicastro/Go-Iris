@@ -50,14 +50,18 @@ func (c *TodoController) DeleteBy(id string) mvc.Result {
 
 	objId, _ := primitive.ObjectIDFromHex(id)
 
-	result, err := todosCollection.DeleteOne(context.TODO(), bson.M{"_id": objId})
-	if err != nil {
-		log.Fatal(err)
+	result, _ := todosCollection.DeleteOne(context.TODO(), bson.M{"_id": objId})
+	if result.DeletedCount == 0 {
+		return mvc.Response{
+			Code: iris.StatusNotFound,
+			Object: map[string]any{
+				"message": "Todo not found",
+			},
+		}
 	}
 
 	return mvc.Response{
-		Code:   iris.StatusOK,
-		Object: result,
+		Code: iris.StatusNoContent,
 	}
 }
 
@@ -73,8 +77,7 @@ func (c *TodoController) GetBy(id string) mvc.Result {
 		return mvc.Response{
 			Code: iris.StatusNotFound,
 			Object: map[string]any{
-				"Message": "test",
-				"hmm":     1,
+				"message": "Todo not found",
 			},
 		}
 	}
@@ -82,5 +85,26 @@ func (c *TodoController) GetBy(id string) mvc.Result {
 	return mvc.Response{
 		Code:   iris.StatusOK,
 		Object: todo,
+	}
+}
+
+func (c *TodoController) PutBy(id string, t models.Todo) mvc.Result {
+	todo := bson.M{"Title": t.Title}
+
+	todosCollection := config.GetCollection("todos")
+
+	objId, _ := primitive.ObjectIDFromHex(id)
+
+	result, err := todosCollection.UpdateOne(context.TODO(),
+		bson.M{"_id": objId},
+		bson.M{"$set": todo},
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return mvc.Response{
+		Code:   iris.StatusOK,
+		Object: result,
 	}
 }
