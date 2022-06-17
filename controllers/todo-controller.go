@@ -1,49 +1,29 @@
 package controllers
 
 import (
-	"context"
 	"errors"
 	"fmt"
-	"go-iris/config"
+	"go-iris/dtos"
 	"go-iris/models"
 	"go-iris/services"
-	"log"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/mvc"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type TodoController struct {
 	/* dependencies */
 }
 
-func (c *TodoController) Get() []models.Todo {
-	var todos []models.Todo
-
-	todosCollection := config.GetCollection("todos")
-	cursor, err := todosCollection.Find(context.TODO(), bson.D{{}})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err = cursor.All(context.TODO(), &todos); err != nil {
-		log.Fatal(err)
-	}
+func (c *TodoController) Get() []dtos.TodoResponse {
+	todos := services.GetTodos()
 
 	return todos
 }
 
 func (c *TodoController) GetBy(id string) mvc.Result {
-	var todo models.Todo
-
-	todosCollection := config.GetCollection("todos")
-
-	objId, _ := primitive.ObjectIDFromHex(id)
-
-	err := todosCollection.FindOne(context.TODO(), bson.M{"_id": objId}).Decode(&todo)
+	todo, err := services.FindTodo(id)
 	if err != nil {
 		return mvc.Response{
 			Code: iris.StatusNotFound,
@@ -76,34 +56,27 @@ func (c *TodoController) Post(todo models.Todo) mvc.Result {
 	}
 }
 
-func (c *TodoController) PutBy(id string, t models.Todo) mvc.Result {
-	todo := bson.M{"title": t.Title}
+func (c *TodoController) PutBy(id string, request models.Todo) mvc.Result {
+	modifiedCount := services.UpdateTodo(id, request)
 
-	todosCollection := config.GetCollection("todos")
-
-	objId, _ := primitive.ObjectIDFromHex(id)
-
-	result, err := todosCollection.UpdateOne(context.TODO(),
-		bson.M{"_id": objId},
-		bson.M{"$set": todo},
-	)
-	if err != nil {
-		log.Fatal(err)
+	if modifiedCount == 0 {
+		return mvc.Response{
+			Code: iris.StatusNotFound,
+			Object: map[string]any{
+				"message": "Todo not found",
+			},
+		}
 	}
 
 	return mvc.Response{
-		Code:   iris.StatusOK,
-		Object: result,
+		Code: iris.StatusOK,
 	}
 }
 
 func (c *TodoController) DeleteBy(id string) mvc.Result {
-	todosCollection := config.GetCollection("todos")
+	deletedCount := services.DeleteTodo(id)
 
-	objId, _ := primitive.ObjectIDFromHex(id)
-
-	result, _ := todosCollection.DeleteOne(context.TODO(), bson.M{"_id": objId})
-	if result.DeletedCount == 0 {
+	if deletedCount == 0 {
 		return mvc.Response{
 			Code: iris.StatusNotFound,
 			Object: map[string]any{
