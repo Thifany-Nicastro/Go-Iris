@@ -2,11 +2,14 @@ package controllers
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"go-iris/config"
 	"go-iris/models"
 	"go-iris/services"
 	"log"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/mvc"
 	"go.mongodb.org/mongo-driver/bson"
@@ -114,48 +117,27 @@ func (c *TodoController) DeleteBy(id string) mvc.Result {
 	}
 }
 
-// func (c *TodoController) HandleError(ctx iris.Context, err error) {
-// 	if iris.IsErrPath(err) {
-// 		// to ignore any "schema: invalid path" you can check the error type
-// 		// and don't stop the execution.
-// 		ctx.WriteString(err.Error())
-// 		return // continue.
-// 	}
-
-// 	// ctx.WriteString(err.Error())
-// 	// ctx.StopExecution()
-// 	ctx.StopWithError(iris.StatusBadGateway, errors.New("bb"))
-// }
-
 type ErrorResponse struct {
 	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
 
-func (c *TodoController) HandleHTTPError(err mvc.Err, statusCode mvc.Code) ErrorResponse {
-	/* OR
-	err := ctx.GetErr()
-	code := ctx.GetStatusCode()
-	*/
-	code := int(statusCode)
-	msg := ""
-	if err != nil {
-		msg = err.Error()
-	} else {
-		msg = iris.StatusText(code)
-	}
-
-	return ErrorResponse{
-		Code:    code,
-		Message: msg,
-	}
-}
-
 func (c *TodoController) HandleError(ctx iris.Context, err error) {
-	// ctx.StopWithError(iris.StatusBadGateway, errors.New("abc"))
+	code := iris.StatusInternalServerError
+	message := "Ops! Something went wrong"
+
+	if errors.As(err, &validator.ValidationErrors{}) {
+		code = iris.StatusUnprocessableEntity
+		message = err.Error()
+	}
+
+	fmt.Println(err.Error())
 
 	ctx.StopWithJSON(
-		iris.StatusBadGateway,
-		c.HandleHTTPError(err, iris.StatusBadGateway),
+		code,
+		ErrorResponse{
+			Code:    code,
+			Message: message,
+		},
 	)
 }
