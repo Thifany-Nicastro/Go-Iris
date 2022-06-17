@@ -1,5 +1,5 @@
 package models
 
 type Todo struct {
-	Title string `json:"title"`
+	Title string `json:"title" validate:"required"`
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"go-iris/config"
 	"go-iris/models"
+	"go-iris/services"
 	"log"
 
 	"github.com/kataras/iris/v12"
@@ -32,15 +33,63 @@ func (c *TodoController) Get() []models.Todo {
 	return todos
 }
 
-func (c *TodoController) Post(t models.Todo) mvc.Result {
+func (c *TodoController) GetBy(id string) mvc.Result {
+	var todo models.Todo
+
 	todosCollection := config.GetCollection("todos")
-	result, err := todosCollection.InsertOne(context.TODO(), t)
+
+	objId, _ := primitive.ObjectIDFromHex(id)
+
+	err := todosCollection.FindOne(context.TODO(), bson.M{"_id": objId}).Decode(&todo)
+	if err != nil {
+		return mvc.Response{
+			Code: iris.StatusNotFound,
+			Object: map[string]any{
+				"message": "Todo not found",
+			},
+		}
+	}
+
+	return mvc.Response{
+		Code:   iris.StatusOK,
+		Object: todo,
+	}
+}
+
+func (c *TodoController) Post(todo models.Todo) mvc.Result {
+	id, err := services.CreateTodo(todo)
+	if err != nil {
+		return mvc.Response{
+			Code: iris.StatusBadRequest,
+			Object: map[string]any{
+				"message": err.Error(),
+			},
+		}
+	}
+
+	return mvc.Response{
+		Code:   iris.StatusCreated,
+		Object: id,
+	}
+}
+
+func (c *TodoController) PutBy(id string, t models.Todo) mvc.Result {
+	todo := bson.M{"title": t.Title}
+
+	todosCollection := config.GetCollection("todos")
+
+	objId, _ := primitive.ObjectIDFromHex(id)
+
+	result, err := todosCollection.UpdateOne(context.TODO(),
+		bson.M{"_id": objId},
+		bson.M{"$set": todo},
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	return mvc.Response{
-		Code:   iris.StatusCreated,
+		Code:   iris.StatusOK,
 		Object: result,
 	}
 }
@@ -65,46 +114,48 @@ func (c *TodoController) DeleteBy(id string) mvc.Result {
 	}
 }
 
-func (c *TodoController) GetBy(id string) mvc.Result {
-	var todo models.Todo
+// func (c *TodoController) HandleError(ctx iris.Context, err error) {
+// 	if iris.IsErrPath(err) {
+// 		// to ignore any "schema: invalid path" you can check the error type
+// 		// and don't stop the execution.
+// 		ctx.WriteString(err.Error())
+// 		return // continue.
+// 	}
 
-	todosCollection := config.GetCollection("todos")
+// 	// ctx.WriteString(err.Error())
+// 	// ctx.StopExecution()
+// 	ctx.StopWithError(iris.StatusBadGateway, errors.New("bb"))
+// }
 
-	objId, _ := primitive.ObjectIDFromHex(id)
+type ErrorResponse struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
 
-	err := todosCollection.FindOne(context.TODO(), bson.M{"_id": objId}).Decode(&todo)
+func (c *TodoController) HandleHTTPError(err mvc.Err, statusCode mvc.Code) ErrorResponse {
+	/* OR
+	err := ctx.GetErr()
+	code := ctx.GetStatusCode()
+	*/
+	code := int(statusCode)
+	msg := ""
 	if err != nil {
-		return mvc.Response{
-			Code: iris.StatusNotFound,
-			Object: map[string]any{
-				"message": "Todo not found",
-			},
-		}
+		msg = err.Error()
+	} else {
+		msg = iris.StatusText(code)
 	}
 
-	return mvc.Response{
-		Code:   iris.StatusOK,
-		Object: todo,
+	return ErrorResponse{
+		Code:    code,
+		Message: msg,
 	}
 }
 
-func (c *TodoController) PutBy(id string, t models.Todo) mvc.Result {
-	todo := bson.M{"Title": t.Title}
+func (c *TodoController) HandleError(ctx iris.Context, err error) {
+	// ctx.StopWithError(iris.StatusBadGateway, errors.New("abc"))
 
-	todosCollection := config.GetCollection("todos")
-
-	objId, _ := primitive.ObjectIDFromHex(id)
-
-	result, err := todosCollection.UpdateOne(context.TODO(),
-		bson.M{"_id": objId},
-		bson.M{"$set": todo},
+	ctx.StopWithJSON(
+		iris.StatusBadGateway,
+		c.HandleHTTPError(err, iris.StatusBadGateway),
 	)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return mvc.Response{
-		Code:   iris.StatusOK,
-		Object: result,
-	}
 }

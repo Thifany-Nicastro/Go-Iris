@@ -5,12 +5,16 @@ import (
 	"go-iris/controllers"
 	"go-iris/routes"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/mvc"
 )
 
 func main() {
+	v := validator.New()
+
 	app := iris.New()
+	app.Validator = v
 
 	config.Connect()
 
