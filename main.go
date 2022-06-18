@@ -3,6 +3,7 @@ package main
 import (
 	"go-iris/config"
 	"go-iris/controllers"
+	"go-iris/repositories"
 	"go-iris/routes"
 	"go-iris/services"
 
@@ -17,8 +18,6 @@ func main() {
 	app := iris.New()
 	app.Validator = v
 
-	// config.Connect()
-
 	mvc.Configure(app.Party("/todos"), configureMVC)
 
 	routes.RegisterRoutes(app)
@@ -29,18 +28,9 @@ func main() {
 func configureMVC(app *mvc.Application) {
 	app.Register(
 		config.Connect,
+		repositories.NewTodoRepository,
 		services.NewTodoService,
 	)
-
-	// db := config.Connect()
-	// app.Register(
-	// 	services.NewTodoService(db),
-	// )
-
-	// db := config.Connect()
-	// todoService := services.NewTodoService(db)
-	// fmt.Println("hmmmmm" + db.Database("go-iris").Name())
-	// app.Register(todoService)
 
 	app.Handle(new(controllers.TodoController))
 }

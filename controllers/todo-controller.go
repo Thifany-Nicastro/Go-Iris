@@ -39,8 +39,8 @@ func (c *TodoController) GetBy(id string) mvc.Result {
 	}
 }
 
-func (c *TodoController) Post(todo models.Todo) mvc.Result {
-	id, err := c.Service.CreateTodo(todo)
+func (c *TodoController) Post(request models.Todo) mvc.Result {
+	id, err := c.Service.CreateTodo(request)
 	if err != nil {
 		return mvc.Response{
 			Code: iris.StatusBadRequest,
