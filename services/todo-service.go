@@ -2,16 +2,55 @@ package services
 
 import (
 	"context"
-	"go-iris/config"
+	"fmt"
 	"go-iris/dtos"
 	"go-iris/models"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func CreateTodo(todo models.Todo) (interface{}, error) {
-	todosCollection := config.GetCollection("todos")
+type todoService struct {
+	db *mongo.Client
+}
+
+type TodoService interface {
+	CreateTodo(todo models.Todo) (interface{}, error)
+	DeleteTodo(id string) int64
+	GetTodos() []dtos.TodoResponse
+	FindTodo(id string) (models.Todo, error)
+	UpdateTodo(id string, request models.Todo) int64
+}
+
+func NewTodoService(db *mongo.Client) TodoService {
+	fmt.Println("hmm" + db.Database("go-iris").Name())
+	return &todoService{
+		db: db,
+	}
+}
+
+func (s *todoService) GetTodos() []dtos.TodoResponse {
+	// todos := []dtos.TodoResponse{
+	// 	{Id: "1", Title: "Buy Milk"},
+	// 	{Id: "2", Title: "Buy Milk"},
+	// }
+
+	fmt.Println(s.db.Database("go-iris").Name())
+
+	var todos []dtos.TodoResponse
+
+	todosCollection := s.db.Database("go-iris").Collection("todos")
+
+	cursor, _ := todosCollection.Find(context.TODO(), bson.D{{}})
+
+	cursor.All(context.TODO(), &todos)
+
+	return todos
+}
+
+func (s *todoService) CreateTodo(todo models.Todo) (interface{}, error) {
+	todosCollection := s.db.Database("go-iris").Collection("todos")
 
 	result, err := todosCollection.InsertOne(context.TODO(), todo)
 	if err != nil {
@@ -21,8 +60,8 @@ func CreateTodo(todo models.Todo) (interface{}, error) {
 	return result.InsertedID, nil
 }
 
-func DeleteTodo(id string) int64 {
-	todosCollection := config.GetCollection("todos")
+func (s *todoService) DeleteTodo(id string) int64 {
+	todosCollection := s.db.Database("go-iris").Collection("todos")
 
 	objId, _ := primitive.ObjectIDFromHex(id)
 
@@ -31,22 +70,10 @@ func DeleteTodo(id string) int64 {
 	return result.DeletedCount
 }
 
-func GetTodos() []dtos.TodoResponse {
-	var todos []dtos.TodoResponse
-
-	todosCollection := config.GetCollection("todos")
-
-	cursor, _ := todosCollection.Find(context.TODO(), bson.D{{}})
-
-	cursor.All(context.TODO(), &todos)
-
-	return todos
-}
-
-func FindTodo(id string) (models.Todo, error) {
+func (s *todoService) FindTodo(id string) (models.Todo, error) {
 	var todo models.Todo
 
-	todosCollection := config.GetCollection("todos")
+	todosCollection := s.db.Database("go-iris").Collection("todos")
 
 	objId, _ := primitive.ObjectIDFromHex(id)
 
@@ -58,12 +85,12 @@ func FindTodo(id string) (models.Todo, error) {
 	return todo, nil
 }
 
-func UpdateTodo(id string, request models.Todo) int64 {
+func (s *todoService) UpdateTodo(id string, request models.Todo) int64 {
 	todo := bson.M{
 		"title": request.Title,
 	}
 
-	todosCollection := config.GetCollection("todos")
+	todosCollection := s.db.Database("go-iris").Collection("todos")
 
 	objId, _ := primitive.ObjectIDFromHex(id)
 

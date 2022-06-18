@@ -13,17 +13,17 @@ import (
 )
 
 type TodoController struct {
-	/* dependencies */
+	Service services.TodoService
 }
 
 func (c *TodoController) Get() []dtos.TodoResponse {
-	todos := services.GetTodos()
+	todos := c.Service.GetTodos()
 
 	return todos
 }
 
 func (c *TodoController) GetBy(id string) mvc.Result {
-	todo, err := services.FindTodo(id)
+	todo, err := c.Service.FindTodo(id)
 	if err != nil {
 		return mvc.Response{
 			Code: iris.StatusNotFound,
@@ -40,7 +40,7 @@ func (c *TodoController) GetBy(id string) mvc.Result {
 }
 
 func (c *TodoController) Post(todo models.Todo) mvc.Result {
-	id, err := services.CreateTodo(todo)
+	id, err := c.Service.CreateTodo(todo)
 	if err != nil {
 		return mvc.Response{
 			Code: iris.StatusBadRequest,
@@ -57,7 +57,7 @@ func (c *TodoController) Post(todo models.Todo) mvc.Result {
 }
 
 func (c *TodoController) PutBy(id string, request models.Todo) mvc.Result {
-	modifiedCount := services.UpdateTodo(id, request)
+	modifiedCount := c.Service.UpdateTodo(id, request)
 
 	if modifiedCount == 0 {
 		return mvc.Response{
@@ -74,7 +74,7 @@ func (c *TodoController) PutBy(id string, request models.Todo) mvc.Result {
 }
 
 func (c *TodoController) DeleteBy(id string) mvc.Result {
-	deletedCount := services.DeleteTodo(id)
+	deletedCount := c.Service.DeleteTodo(id)
 
 	if deletedCount == 0 {
 		return mvc.Response{
