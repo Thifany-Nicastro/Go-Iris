@@ -1,5 +1,9 @@
 package models
 
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
 type Todo struct {
-	Title string `json:"title" validate:"required"`
+	ID          primitive.ObjectID `bson:"_id"`
+	Title       string             `bson:"title"`
+	IsCompleted bool               `bson:"is_completed"`
 }

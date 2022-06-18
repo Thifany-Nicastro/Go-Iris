@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"go-iris/dtos"
-	"go-iris/models"
 	"go-iris/services"
 
 	"github.com/go-playground/validator/v10"
@@ -24,6 +23,7 @@ func (c *TodoController) Get() []dtos.TodoResponse {
 
 func (c *TodoController) GetBy(id string) mvc.Result {
 	todo, err := c.Service.FindTodo(id)
+
 	if err != nil {
 		return mvc.Response{
 			Code: iris.StatusNotFound,
@@ -39,8 +39,9 @@ func (c *TodoController) GetBy(id string) mvc.Result {
 	}
 }
 
-func (c *TodoController) Post(request models.Todo) mvc.Result {
+func (c *TodoController) Post(request dtos.TodoRequest) mvc.Result {
 	id, err := c.Service.CreateTodo(request)
+
 	if err != nil {
 		return mvc.Response{
 			Code: iris.StatusBadRequest,
@@ -56,7 +57,7 @@ func (c *TodoController) Post(request models.Todo) mvc.Result {
 	}
 }
 
-func (c *TodoController) PutBy(id string, request models.Todo) mvc.Result {
+func (c *TodoController) PutBy(id string, request dtos.TodoRequest) mvc.Result {
 	modifiedCount := c.Service.UpdateTodo(id, request)
 
 	if modifiedCount == 0 {
@@ -90,8 +91,27 @@ func (c *TodoController) DeleteBy(id string) mvc.Result {
 	}
 }
 
+func (c *TodoController) PutCompleteBy(id string) mvc.Result {
+	modifiedCount := c.Service.CompleteTodo(id)
+
+	if modifiedCount == 0 {
+		return mvc.Response{
+			Code: iris.StatusNotFound,
+			Object: map[string]any{
+				"message": "Todo not found",
+			},
+		}
+	}
+
+	return mvc.Response{
+		Code: iris.StatusOK,
+		Object: map[string]any{
+			"message": "Todo completed!",
+		},
+	}
+}
+
 type ErrorResponse struct {
-	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
 
@@ -109,7 +129,6 @@ func (c *TodoController) HandleError(ctx iris.Context, err error) {
 	ctx.StopWithJSON(
 		code,
 		ErrorResponse{
-			Code:    code,
 			Message: message,
 		},
 	)

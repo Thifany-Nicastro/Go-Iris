@@ -19,7 +19,7 @@ type TodoRepository interface {
 	All() []dtos.TodoResponse
 	FindById(id primitive.ObjectID) (models.Todo, error)
 	Create(todo models.Todo) (interface{}, error)
-	Update(id primitive.ObjectID, todo primitive.M) int64
+	Update(id primitive.ObjectID, fields primitive.M) int64
 	Delete(id primitive.ObjectID) int64
 }
 
@@ -49,15 +49,13 @@ func (s *todoRepository) FindById(id primitive.ObjectID) (models.Todo, error) {
 }
 
 func (s *todoRepository) Create(todo models.Todo) (interface{}, error) {
-	result, err := s.collection.InsertOne(context.TODO(), todo)
-
-	return result.InsertedID, err
+	return s.collection.InsertOne(context.TODO(), todo)
 }
 
-func (s *todoRepository) Update(id primitive.ObjectID, todo primitive.M) int64 {
+func (s *todoRepository) Update(id primitive.ObjectID, fields primitive.M) int64 {
 	result, _ := s.collection.UpdateOne(context.TODO(),
 		bson.M{"_id": id},
-		bson.M{"$set": todo},
+		bson.M{"$set": fields},
 	)
 
 	return result.ModifiedCount

@@ -15,10 +15,11 @@ type todoService struct {
 
 type TodoService interface {
 	GetTodos() []dtos.TodoResponse
-	FindTodo(id string) (models.Todo, error)
-	CreateTodo(todo models.Todo) (interface{}, error)
-	UpdateTodo(id string, request models.Todo) int64
+	FindTodo(id string) (dtos.TodoResponse, error)
+	CreateTodo(request dtos.TodoRequest) (interface{}, error)
+	UpdateTodo(id string, request dtos.TodoRequest) int64
 	DeleteTodo(id string) int64
+	CompleteTodo(id string) int64
 }
 
 func NewTodoService(Repository repositories.TodoRepository) TodoService {
@@ -31,28 +32,45 @@ func (s *todoService) GetTodos() []dtos.TodoResponse {
 	return s.Repository.All()
 }
 
-func (s *todoService) FindTodo(id string) (models.Todo, error) {
+func (s *todoService) FindTodo(id string) (dtos.TodoResponse, error) {
 	objId, _ := primitive.ObjectIDFromHex(id)
 
-	return s.Repository.FindById(objId)
+	todo, err := s.Repository.FindById(objId)
+
+	return dtos.TodoResponse{
+		ID:          todo.ID,
+		Title:       todo.Title,
+		IsCompleted: todo.IsCompleted,
+	}, err
 }
 
-func (s *todoService) CreateTodo(request models.Todo) (interface{}, error) {
-	return s.Repository.Create(request)
+func (s *todoService) CreateTodo(request dtos.TodoRequest) (interface{}, error) {
+	todo := models.Todo{
+		ID:    primitive.NewObjectID(),
+		Title: request.Title,
+	}
+
+	return s.Repository.Create(todo)
 }
 
-func (s *todoService) UpdateTodo(id string, request models.Todo) int64 {
-	todo := bson.M{
+func (s *todoService) UpdateTodo(id string, request dtos.TodoRequest) int64 {
+	fields := bson.M{
 		"title": request.Title,
 	}
 
 	objId, _ := primitive.ObjectIDFromHex(id)
 
-	return s.Repository.Update(objId, todo)
+	return s.Repository.Update(objId, fields)
 }
 
 func (s *todoService) DeleteTodo(id string) int64 {
 	objId, _ := primitive.ObjectIDFromHex(id)
 
 	return s.Repository.Delete(objId)
+}
+
+func (s *todoService) CompleteTodo(id string) int64 {
+	objId, _ := primitive.ObjectIDFromHex(id)
+
+	return s.Repository.Update(objId, bson.M{"is_completed": true})
 }

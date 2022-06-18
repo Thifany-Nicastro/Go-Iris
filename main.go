@@ -16,6 +16,7 @@ func main() {
 	v := validator.New()
 
 	app := iris.New()
+	app.Logger().SetLevel("debug")
 	app.Validator = v
 
 	mvc.Configure(app.Party("/todos"), configureMVC)
