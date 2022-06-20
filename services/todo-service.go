@@ -2,7 +2,6 @@ package services
 
 import (
 	"go-iris/dtos"
-	"go-iris/models"
 	"go-iris/repositories"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -43,10 +42,7 @@ func (s *todoService) FindTodo(id string) (dtos.TodoResponse, error) {
 }
 
 func (s *todoService) CreateTodo(request dtos.TodoRequest) (interface{}, error) {
-	todo := models.Todo{
-		ID:    primitive.NewObjectID(),
-		Title: request.Title,
-	}
+	todo := dtos.CreateTodoEntity(request)
 
 	return s.Repository.Create(todo)
 }

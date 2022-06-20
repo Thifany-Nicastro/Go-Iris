@@ -26,7 +26,3 @@ func CreateTodoListResponse(todos []models.Todo) []TodoResponse {
 
 	return response
 }
-
-type TodoRequest struct {
-	Title string `json:"title" validate:"required"`
-}
