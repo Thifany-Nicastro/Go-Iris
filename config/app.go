@@ -12,25 +12,27 @@ import (
 )
 
 func NewApp() *iris.Application {
-	v := validator.New()
-
 	app := iris.New()
+	v := validator.New()
+	db := Connect()
+
 	app.Logger().SetLevel("debug")
+
 	app.Validator = v
 
 	mvc.Configure(app.Party("/todos"), configureMVC)
 
-	routes.RegisterRoutes(app)
+	routes.RegisterRoutes(app, db)
 
 	return app
 }
 
-func configureMVC(app *mvc.Application) {
-	app.Register(
+func configureMVC(mvc *mvc.Application) {
+	mvc.Register(
 		Connect,
 		repositories.NewTodoRepository,
 		services.NewTodoService,
 	)
 
-	app.Handle(new(controllers.TodoController))
+	mvc.Handle(new(controllers.TodoController))
 }
