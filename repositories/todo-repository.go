@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"context"
-	"go-iris/dtos"
 	"go-iris/models"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -16,7 +15,7 @@ type todoRepository struct {
 }
 
 type TodoRepository interface {
-	All() []dtos.TodoResponse
+	All() []models.Todo
 	FindById(id primitive.ObjectID) (models.Todo, error)
 	Create(todo models.Todo) (interface{}, error)
 	Update(id primitive.ObjectID, fields primitive.M) int64
@@ -30,8 +29,8 @@ func NewTodoRepository(db *mongo.Client) TodoRepository {
 	}
 }
 
-func (s *todoRepository) All() []dtos.TodoResponse {
-	var todos []dtos.TodoResponse
+func (s *todoRepository) All() []models.Todo {
+	var todos []models.Todo
 
 	cursor, _ := s.collection.Find(context.TODO(), bson.D{{}})
 

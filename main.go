@@ -12,7 +12,7 @@ import (
 	"github.com/kataras/iris/v12/mvc"
 )
 
-func main() {
+func newApp() *iris.Application {
 	v := validator.New()
 
 	app := iris.New()
@@ -23,7 +23,7 @@ func main() {
 
 	routes.RegisterRoutes(app)
 
-	app.Listen("localhost:8080")
+	return app
 }
 
 func configureMVC(app *mvc.Application) {
@@ -34,4 +34,9 @@ func configureMVC(app *mvc.Application) {
 	)
 
 	app.Handle(new(controllers.TodoController))
+}
+
+func main() {
+	app := newApp()
+	app.Listen("localhost:8080")
 }

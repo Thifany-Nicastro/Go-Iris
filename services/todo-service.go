@@ -29,7 +29,9 @@ func NewTodoService(Repository repositories.TodoRepository) TodoService {
 }
 
 func (s *todoService) GetTodos() []dtos.TodoResponse {
-	return s.Repository.All()
+	todos := s.Repository.All()
+
+	return dtos.CreateTodoListResponse(todos)
 }
 
 func (s *todoService) FindTodo(id string) (dtos.TodoResponse, error) {
@@ -37,11 +39,7 @@ func (s *todoService) FindTodo(id string) (dtos.TodoResponse, error) {
 
 	todo, err := s.Repository.FindById(objId)
 
-	return dtos.TodoResponse{
-		ID:          todo.ID.Hex(),
-		Title:       todo.Title,
-		IsCompleted: todo.IsCompleted,
-	}, err
+	return dtos.CreateTodoResponse(todo), err
 }
 
 func (s *todoService) CreateTodo(request dtos.TodoRequest) (interface{}, error) {
