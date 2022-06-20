@@ -38,7 +38,7 @@ func (s *todoService) FindTodo(id string) (dtos.TodoResponse, error) {
 	todo, err := s.Repository.FindById(objId)
 
 	return dtos.TodoResponse{
-		ID:          todo.ID,
+		ID:          todo.ID.Hex(),
 		Title:       todo.Title,
 		IsCompleted: todo.IsCompleted,
 	}, err
