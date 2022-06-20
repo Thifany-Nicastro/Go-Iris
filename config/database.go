@@ -10,8 +10,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// var MongoClient *mongo.Client
-
 func getURI() string {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found")
@@ -32,17 +30,6 @@ func Connect() *mongo.Client {
 	if err != nil {
 		log.Fatal("No connection :(")
 	}
-	// defer func() {
-	// 	if err = mongoClient.Disconnect(context.TODO()); err != nil {
-	// 		panic(err)
-	// 	}
-	// }()
 
 	return mongoClient
 }
-
-// func GetCollection(db *mongo.Client, collectionName string) *mongo.Collection {
-// 	collection := db.Database("go-iris").Collection(collectionName)
-
-// 	return collection
-// }
