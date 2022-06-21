@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"go-iris/dtos"
 	"go-iris/services"
 
 	"github.com/kataras/iris/v12"
@@ -18,8 +19,14 @@ func Show(service services.UserService, ctx iris.Context) {
 	ctx.JSON(user)
 }
 
-func Create(ctx iris.Context) {
-	//
+func Create(service services.UserService, ctx iris.Context) {
+	var request dtos.UserRequest
+
+	ctx.ReadJSON(&request)
+
+	service.CreateUser(request)
+
+	ctx.JSON(iris.Map{"message": "OK"})
 }
 
 func Delete(ctx iris.Context) {

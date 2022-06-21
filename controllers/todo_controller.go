@@ -27,7 +27,7 @@ func (c *TodoController) GetBy(id string) mvc.Result {
 	if err != nil {
 		return mvc.Response{
 			Code: iris.StatusNotFound,
-			Object: map[string]any{
+			Object: iris.Map{
 				"message": "Todo not found",
 			},
 		}
@@ -45,15 +45,17 @@ func (c *TodoController) Post(request dtos.TodoRequest) mvc.Result {
 	if err != nil {
 		return mvc.Response{
 			Code: iris.StatusBadRequest,
-			Object: map[string]any{
+			Object: iris.Map{
 				"message": err.Error(),
 			},
 		}
 	}
 
 	return mvc.Response{
-		Code:   iris.StatusCreated,
-		Object: id,
+		Code: iris.StatusCreated,
+		Object: iris.Map{
+			"message": "Todo #" + id + " created",
+		},
 	}
 }
 
@@ -63,7 +65,7 @@ func (c *TodoController) PutBy(id string, request dtos.TodoRequest) mvc.Result {
 	if modifiedCount == 0 {
 		return mvc.Response{
 			Code: iris.StatusNotFound,
-			Object: map[string]any{
+			Object: iris.Map{
 				"message": "Todo not found",
 			},
 		}
@@ -80,7 +82,7 @@ func (c *TodoController) DeleteBy(id string) mvc.Result {
 	if deletedCount == 0 {
 		return mvc.Response{
 			Code: iris.StatusNotFound,
-			Object: map[string]any{
+			Object: iris.Map{
 				"message": "Todo not found",
 			},
 		}
@@ -97,7 +99,7 @@ func (c *TodoController) PutCompleteBy(id string) mvc.Result {
 	if modifiedCount == 0 {
 		return mvc.Response{
 			Code: iris.StatusNotFound,
-			Object: map[string]any{
+			Object: iris.Map{
 				"message": "Todo not found",
 			},
 		}
@@ -105,7 +107,7 @@ func (c *TodoController) PutCompleteBy(id string) mvc.Result {
 
 	return mvc.Response{
 		Code: iris.StatusOK,
-		Object: map[string]any{
+		Object: iris.Map{
 			"message": "Todo completed!",
 		},
 	}

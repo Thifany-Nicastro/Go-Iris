@@ -17,7 +17,7 @@ type userRepository struct {
 type UserRepository interface {
 	All() []models.User
 	FindById(id primitive.ObjectID) (models.User, error)
-	Create(user models.User) (interface{}, error)
+	Create(user models.User) (primitive.ObjectID, error)
 	Update(id primitive.ObjectID, fields primitive.M) int64
 	Delete(id primitive.ObjectID) int64
 }
@@ -47,8 +47,10 @@ func (s *userRepository) FindById(id primitive.ObjectID) (models.User, error) {
 	return user, err
 }
 
-func (s *userRepository) Create(user models.User) (interface{}, error) {
-	return s.collection.InsertOne(context.TODO(), user)
+func (s *userRepository) Create(user models.User) (primitive.ObjectID, error) {
+	result, err := s.collection.InsertOne(context.TODO(), user)
+
+	return result.InsertedID.(primitive.ObjectID), err
 }
 
 func (s *userRepository) Update(id primitive.ObjectID, fields primitive.M) int64 {

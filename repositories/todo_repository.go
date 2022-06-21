@@ -17,7 +17,7 @@ type todoRepository struct {
 type TodoRepository interface {
 	All() []models.Todo
 	FindById(id primitive.ObjectID) (models.Todo, error)
-	Create(todo models.Todo) (interface{}, error)
+	Create(todo models.Todo) (primitive.ObjectID, error)
 	Update(id primitive.ObjectID, fields primitive.M) int64
 	Delete(id primitive.ObjectID) int64
 }
@@ -47,8 +47,10 @@ func (s *todoRepository) FindById(id primitive.ObjectID) (models.Todo, error) {
 	return todo, err
 }
 
-func (s *todoRepository) Create(todo models.Todo) (interface{}, error) {
-	return s.collection.InsertOne(context.TODO(), todo)
+func (s *todoRepository) Create(todo models.Todo) (primitive.ObjectID, error) {
+	result, err := s.collection.InsertOne(context.TODO(), todo)
+
+	return result.InsertedID.(primitive.ObjectID), err
 }
 
 func (s *todoRepository) Update(id primitive.ObjectID, fields primitive.M) int64 {

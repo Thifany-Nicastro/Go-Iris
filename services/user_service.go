@@ -14,7 +14,7 @@ type userService struct {
 type UserService interface {
 	GetUsers() []dtos.UserResponse
 	FindUser(id string) (dtos.UserResponse, error)
-	CreateUser(request dtos.UserRequest) (interface{}, error)
+	CreateUser(request dtos.UserRequest) (string, error)
 	// UpdateUser(id string, request dtos.UserRequest) int64
 	DeleteUser(id string) int64
 }
@@ -39,10 +39,12 @@ func (s *userService) FindUser(id string) (dtos.UserResponse, error) {
 	return dtos.CreateUserResponse(user), err
 }
 
-func (s *userService) CreateUser(request dtos.UserRequest) (interface{}, error) {
+func (s *userService) CreateUser(request dtos.UserRequest) (string, error) {
 	user := dtos.CreateUserEntity(request)
 
-	return s.Repository.Create(user)
+	id, err := s.Repository.Create(user)
+
+	return id.Hex(), err
 }
 
 // func (s *userService) UpdateUser(id string, request dtos.UserRequest) int64 {

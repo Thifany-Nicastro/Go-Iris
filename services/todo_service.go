@@ -15,7 +15,7 @@ type todoService struct {
 type TodoService interface {
 	GetTodos() []dtos.TodoResponse
 	FindTodo(id string) (dtos.TodoResponse, error)
-	CreateTodo(request dtos.TodoRequest) (interface{}, error)
+	CreateTodo(request dtos.TodoRequest) (string, error)
 	UpdateTodo(id string, request dtos.TodoRequest) int64
 	DeleteTodo(id string) int64
 	CompleteTodo(id string) int64
@@ -41,10 +41,12 @@ func (s *todoService) FindTodo(id string) (dtos.TodoResponse, error) {
 	return dtos.CreateTodoResponse(todo), err
 }
 
-func (s *todoService) CreateTodo(request dtos.TodoRequest) (interface{}, error) {
+func (s *todoService) CreateTodo(request dtos.TodoRequest) (string, error) {
 	todo := dtos.CreateTodoEntity(request)
 
-	return s.Repository.Create(todo)
+	id, err := s.Repository.Create(todo)
+
+	return id.Hex(), err
 }
 
 func (s *todoService) UpdateTodo(id string, request dtos.TodoRequest) int64 {
