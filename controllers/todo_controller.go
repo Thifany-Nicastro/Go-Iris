@@ -7,6 +7,7 @@ import (
 	"go-iris/services"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/mvc"
 )
@@ -39,8 +40,10 @@ func (c *TodoController) GetBy(id string) mvc.Result {
 	}
 }
 
-func (c *TodoController) Post(request dtos.TodoRequest) mvc.Result {
-	id, err := c.Service.CreateTodo(request)
+func (c *TodoController) Post(ctx iris.Context, request dtos.TodoRequest) mvc.Result {
+	token := ctx.Values().Get("jwt").(*jwt.Token).Claims.(jwt.MapClaims)
+
+	id, err := c.Service.CreateTodo(request, token["user"].(string))
 
 	if err != nil {
 		return mvc.Response{

@@ -6,6 +6,7 @@ type TodoResponse struct {
 	ID          string `json:"id"`
 	Title       string `json:"title"`
 	IsCompleted bool   `json:"is_completed"`
+	UserID      string `json:"user_id"`
 }
 
 func CreateTodoResponse(todo models.Todo) TodoResponse {
@@ -13,6 +14,7 @@ func CreateTodoResponse(todo models.Todo) TodoResponse {
 		ID:          todo.ID.Hex(),
 		Title:       todo.Title,
 		IsCompleted: todo.IsCompleted,
+		UserID:      todo.UserID.Hex(),
 	}
 }
 

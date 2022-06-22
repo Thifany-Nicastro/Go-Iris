@@ -39,8 +39,9 @@ func (s *authService) Login(request dtos.UserRequest) (string, error) {
 
 func GenerateToken(userId string) string {
 	token := jwt.NewTokenWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"iat": time.Now().Unix(),
-		"exp": time.Now().Add(time.Minute * 5).Unix(),
+		"user": userId,
+		"iat":  time.Now().Unix(),
+		"exp":  time.Now().Add(time.Minute * 5).Unix(),
 	})
 
 	tokenString, _ := token.SignedString([]byte(utils.GetEnvVar("SECRET")))
