@@ -5,15 +5,23 @@ import (
 	"fmt"
 	"go-iris/dtos"
 	"go-iris/services"
+	"go-iris/utils"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/golang-jwt/jwt/v4"
 	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/mvc"
 )
 
 type TodoController struct {
 	Service services.TodoService
+	// Ctx     iris.Context
+	User string
+}
+
+func (c *TodoController) BeforeActivation(ctx iris.Context, b mvc.BeforeActivation) {
+	user := utils.GetAuthenticatedUser(ctx)
+
+	b.Dependencies().Register(user)
 }
 
 func (c *TodoController) Get() []dtos.TodoResponse {
@@ -40,10 +48,10 @@ func (c *TodoController) GetBy(id string) mvc.Result {
 	}
 }
 
-func (c *TodoController) Post(ctx iris.Context, request dtos.TodoRequest) mvc.Result {
-	token := ctx.Values().Get("jwt").(*jwt.Token).Claims.(jwt.MapClaims)
+func (c *TodoController) Post(request dtos.TodoRequest) mvc.Result {
+	// user := utils.GetAuthenticatedUser(c.Ctx)
 
-	id, err := c.Service.CreateTodo(request, token["user"].(string))
+	id, err := c.Service.CreateTodo(request, c.User)
 
 	if err != nil {
 		return mvc.Response{
