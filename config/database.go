@@ -2,25 +2,15 @@ package config
 
 import (
 	"context"
+	"go-iris/utils"
 	"log"
-	"os"
 
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func getURI() string {
-	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found")
-	}
-
-	uri := os.Getenv("MONGODB_URI")
-	if uri == "" {
-		log.Fatal("You must set your 'MONGODB_URI' environmental variable. See\n\t https://www.mongodb.com/docs/drivers/go/current/usage-examples/#environment-variable")
-	}
-
-	return uri
+	return utils.GetEnvVar("MONGODB_URI")
 }
 
 func Connect() *mongo.Client {
@@ -28,7 +18,7 @@ func Connect() *mongo.Client {
 
 	mongoClient, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(getURI()))
 	if err != nil {
-		log.Fatal("No connection :(")
+		log.Fatal("No connection")
 	}
 
 	return mongoClient

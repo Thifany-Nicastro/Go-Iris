@@ -36,6 +36,8 @@ func Router(app *iris.Application) {
 	mvc.Configure(app.Party("/todos"), func(m *mvc.Application) {
 		m.Register(todoService)
 
+		m.Router.Use(jwt.Serve)
+
 		m.Handle(new(controllers.TodoController))
 	})
 

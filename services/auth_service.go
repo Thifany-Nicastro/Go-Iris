@@ -3,6 +3,8 @@ package services
 import (
 	"go-iris/dtos"
 	"go-iris/repositories"
+	"go-iris/utils"
+	"time"
 
 	"github.com/iris-contrib/middleware/jwt"
 	"golang.org/x/crypto/bcrypt"
@@ -30,17 +32,18 @@ func (s *authService) Login(request dtos.UserRequest) (string, error) {
 		return "", err
 	}
 
-	tokenString := GenerateToken()
+	tokenString := GenerateToken(user.ID.Hex())
 
 	return tokenString, nil
 }
 
-func GenerateToken() string {
+func GenerateToken(userId string) string {
 	token := jwt.NewTokenWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"foo": "bar",
+		"iat": time.Now().Unix(),
+		"exp": time.Now().Add(time.Minute * 5).Unix(),
 	})
 
-	tokenString, _ := token.SignedString([]byte("secret_key"))
+	tokenString, _ := token.SignedString([]byte(utils.GetEnvVar("SECRET")))
 
 	return tokenString
 }
