@@ -40,7 +40,3 @@ func Create(service services.UserService, ctx iris.Context) {
 func Delete(ctx iris.Context) {
 	//
 }
-
-func Auth(service services.UserService, ctx iris.Context) {
-	//
-}
