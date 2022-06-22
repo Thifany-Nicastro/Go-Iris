@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func RegisterRoutes(app *iris.Application, db *mongo.Client) {
+func RegisterUserRoutes(app *iris.Application, db *mongo.Client) {
 	app.Party("/users").ConfigureContainer(func(r *iris.APIContainer) {
 		r.Use(iris.Compression)
 

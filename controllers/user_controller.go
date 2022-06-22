@@ -24,11 +24,23 @@ func Create(service services.UserService, ctx iris.Context) {
 
 	ctx.ReadJSON(&request)
 
-	service.CreateUser(request)
+	id, err := service.CreateUser(request)
 
-	ctx.JSON(iris.Map{"message": "OK"})
+	if err != nil {
+		ctx.JSON(iris.Map{
+			"message": err.Error(),
+		})
+	}
+
+	ctx.JSON(iris.Map{
+		"message": "User #" + id + " created",
+	})
 }
 
 func Delete(ctx iris.Context) {
+	//
+}
+
+func Auth(service services.UserService, ctx iris.Context) {
 	//
 }
