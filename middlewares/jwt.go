@@ -2,7 +2,6 @@ package middlewares
 
 import (
 	"github.com/iris-contrib/middleware/jwt"
-	"github.com/kataras/iris/v12"
 )
 
 func JWTMiddleware() *jwt.Middleware {
@@ -12,14 +11,4 @@ func JWTMiddleware() *jwt.Middleware {
 		},
 		SigningMethod: jwt.SigningMethodHS256,
 	})
-}
-
-func GenerateToken(ctx iris.Context) {
-	token := jwt.NewTokenWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"foo": "bar",
-	})
-
-	tokenString, _ := token.SignedString([]byte("secret_key"))
-
-	ctx.JSON(tokenString)
 }

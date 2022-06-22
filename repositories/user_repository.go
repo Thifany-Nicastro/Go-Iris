@@ -17,6 +17,7 @@ type userRepository struct {
 type UserRepository interface {
 	All() []models.User
 	FindById(id primitive.ObjectID) (models.User, error)
+	FindByEmail(email string) (models.User, error)
 	Create(user models.User) (primitive.ObjectID, error)
 	Update(id primitive.ObjectID, fields primitive.M) int64
 	Delete(id primitive.ObjectID) int64
@@ -43,6 +44,14 @@ func (s *userRepository) FindById(id primitive.ObjectID) (models.User, error) {
 	var user models.User
 
 	err := s.collection.FindOne(context.TODO(), bson.M{"_id": id}).Decode(&user)
+
+	return user, err
+}
+
+func (s *userRepository) FindByEmail(email string) (models.User, error) {
+	var user models.User
+
+	err := s.collection.FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
 
 	return user, err
 }

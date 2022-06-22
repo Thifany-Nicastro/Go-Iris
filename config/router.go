@@ -25,6 +25,7 @@ func Router(app *iris.Application) {
 		r.Get("/{id:string}", controllers.Show)
 		r.Post("/", controllers.Create)
 		r.Delete("/", controllers.Delete)
+		r.Get("/login", controllers.Login)
 	})
 
 	mvc.Configure(app.Party("/todos"), func(m *mvc.Application) {
@@ -41,5 +42,5 @@ func Router(app *iris.Application) {
 		ctx.JSON("ok")
 	})
 
-	app.Get("/token", middlewares.GenerateToken)
+	// app.Get("/login", controllers.Login)
 }
