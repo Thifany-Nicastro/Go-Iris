@@ -6,6 +6,8 @@ require github.com/gavv/httpexpect v2.0.0+incompatible
 
 require (
 	github.com/fasthttp-contrib/websocket v0.0.0-20160511215533-1f3b11f56072 // indirect
+	github.com/golang-jwt/jwt/v4 v4.4.1 // indirect
+	github.com/iris-contrib/middleware/jwt v0.0.0-20220605200020-e50b808c7502 // indirect
 	github.com/kataras/jwt v0.1.8 // indirect
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/moul/http2curl v1.0.0 // indirect
