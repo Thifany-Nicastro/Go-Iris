@@ -13,7 +13,7 @@ func NewApp() *iris.Application {
 	app := iris.New()
 	v := validator.New()
 
-	app.Logger().SetLevel("debug")
+	// app.Logger().SetLevel("debug")
 
 	app.Validator = v
 

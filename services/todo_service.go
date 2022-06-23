@@ -13,7 +13,7 @@ type todoService struct {
 }
 
 type TodoService interface {
-	GetTodos() []dtos.TodoResponse
+	GetTodos(userId string) []dtos.TodoResponse
 	FindTodo(id string) (dtos.TodoResponse, error)
 	CreateTodo(request dtos.TodoRequest, userId string) (string, error)
 	UpdateTodo(id string, request dtos.TodoRequest) int64
@@ -27,8 +27,10 @@ func NewTodoService(Repository repositories.TodoRepository) TodoService {
 	}
 }
 
-func (s *todoService) GetTodos() []dtos.TodoResponse {
-	todos := s.Repository.All()
+func (s *todoService) GetTodos(userId string) []dtos.TodoResponse {
+	objId, _ := primitive.ObjectIDFromHex(userId)
+
+	todos := s.Repository.All(objId)
 
 	return dtos.CreateTodoListResponse(todos)
 }

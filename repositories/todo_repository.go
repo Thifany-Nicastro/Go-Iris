@@ -15,7 +15,7 @@ type todoRepository struct {
 }
 
 type TodoRepository interface {
-	All() []models.Todo
+	All(userId primitive.ObjectID) []models.Todo
 	FindById(id primitive.ObjectID) (models.Todo, error)
 	Create(todo models.Todo) (primitive.ObjectID, error)
 	Update(id primitive.ObjectID, fields primitive.M) int64
@@ -29,7 +29,7 @@ func NewTodoRepository(db *mongo.Client) TodoRepository {
 	}
 }
 
-func (s *todoRepository) All() []models.Todo {
+func (s *todoRepository) All(userId primitive.ObjectID) []models.Todo {
 	var todos []models.Todo
 
 	cursor, _ := s.collection.Find(context.TODO(), bson.D{{}})

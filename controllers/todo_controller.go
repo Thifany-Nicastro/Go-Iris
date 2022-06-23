@@ -14,18 +14,19 @@ import (
 
 type TodoController struct {
 	Service services.TodoService
-	// Ctx     iris.Context
-	User string
+	User    string
 }
 
-func (c *TodoController) BeforeActivation(ctx iris.Context, b mvc.BeforeActivation) {
-	user := utils.GetAuthenticatedUser(ctx)
+func (c *TodoController) BeforeActivation(b mvc.BeforeActivation) {
+	user := func(ctx iris.Context) string {
+		return utils.GetAuthenticatedUser(ctx)
+	}
 
 	b.Dependencies().Register(user)
 }
 
 func (c *TodoController) Get() []dtos.TodoResponse {
-	todos := c.Service.GetTodos()
+	todos := c.Service.GetTodos(c.User)
 
 	return todos
 }
@@ -49,8 +50,6 @@ func (c *TodoController) GetBy(id string) mvc.Result {
 }
 
 func (c *TodoController) Post(request dtos.TodoRequest) mvc.Result {
-	// user := utils.GetAuthenticatedUser(c.Ctx)
-
 	id, err := c.Service.CreateTodo(request, c.User)
 
 	if err != nil {
