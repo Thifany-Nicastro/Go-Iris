@@ -32,7 +32,7 @@ func NewTodoRepository(db *mongo.Client) TodoRepository {
 func (s *todoRepository) All(userId primitive.ObjectID) []models.Todo {
 	var todos []models.Todo
 
-	cursor, _ := s.collection.Find(context.TODO(), bson.D{{}})
+	cursor, _ := s.collection.Find(context.TODO(), bson.M{"user_id": userId})
 
 	cursor.All(context.TODO(), &todos)
 
